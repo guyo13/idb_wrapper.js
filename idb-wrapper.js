@@ -225,3 +225,39 @@ IDBWrapper.prototype.openIndexCursor = function(objectStoreName,
   cursorRequest.onerror = onerror;
   cursorRequest.onsuccess = onsuccess;
 };
+
+
+/// [objectStoreName] - A String representing an Object Store's name
+/// [x] - The relevant key path value(s) for only, lowerBound, upperBound queries, and the lower key path on bound queries
+/// [y] - The relevant key path value(s) for the upper key path on bound queries
+/// [queryType] - An IDBWrapper.prototype.queryType enum value specifying query type
+/// [direction] - The query direction (A valid String or one of IDBWrapper.prototype.cursorDirection object)
+/// [lowerOpen] - A Boolean indicating whether query should be exclusive on it's lower end
+/// [upperOpen] - A Boolean indicating whether query should be exclusive on it's upper end
+/// [onsuccess] - A callback to fire if openCursor request succeeds. Has a single argument (e) where
+/// e.target.result is the IDBCursor
+/// [onerror] - A callback to fire if openCursor request fails. Has a single argument
+IDBWrapper.prototype.openCursor = function(objectStoreName,
+                                           x,
+                                           y=undefined,
+                                           queryType=IDBWrapper.prototype.queryType.only,
+                                           direction=IDBWrapper.prototype.cursorDirection.next,
+                                           lowerOpen=false,
+                                           upperOpen=false,
+                                           onsuccess=undefined,
+                                           onerror=undefined,
+                                           mode=IDBWrapper.prototype.READONLY,
+                                          ) {
+  const keyRange = this.createKeyRange(queryType, direction, x, lowerOpen, upperOpen, y);
+  if (keyRange == undefined) {
+    if (onerror) {
+      onerror({"error": "Could not perform operation"});
+    }
+    return;
+  }
+  const objectStore = this.getObjectStore(objectStoreName, mode);
+  const cursorRequest = objectStore.openCursor(keyRange, direction);
+  cursorRequest.onerror = onerror;
+  cursorRequest.onsuccess = onsuccess;
+  return cursorRequest;
+};
