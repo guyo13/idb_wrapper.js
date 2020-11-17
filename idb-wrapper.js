@@ -1,5 +1,6 @@
 // Copyright (c) 2020, Guy Or Please see the AUTHORS file for details.
-// All rights reserved.
+// All rights reserved. Use of this source code is governed by the MIT
+// license that can be found in the LICENSE file.
 
 function defaultOnConfirm() { console.log("User confirmed"); }
 function defaultOnDeny() { console.log("User denied"); }
