@@ -1,0 +1,27 @@
+{
+  "name": "idb_wrapper",
+  "version": "1.0.0",
+  "description": "An extensible and lightweight wrapper around IndexedDB",
+  "main": "idb-wrapper.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guyo13/idb_wrapper.js.git"
+  },
+  "keywords": [
+    "IndexedDB",
+    "idb",
+    "database",
+    "websql",
+    "localstorage",
+    "html5"
+  ],
+  "author": "Guy Or",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/guyo13/idb_wrapper.js/issues"
+  },
+  "homepage": "https://github.com/guyo13/idb_wrapper.js#readme"
+}
