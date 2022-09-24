@@ -1,2 +1,3 @@
 # IDBWrapper
-An extensible and lightweight wrapper around IndexedDB 
+
+A lightweight wrapper around IndexedDB.

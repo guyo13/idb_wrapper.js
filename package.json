@@ -1,27 +1,41 @@
 {
-  "name": "idb_wrapper",
-  "version": "1.0.0",
-  "description": "An extensible and lightweight wrapper around IndexedDB",
-  "main": "idb-wrapper.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/guyo13/idb_wrapper.js.git"
-  },
-  "keywords": [
-    "IndexedDB",
-    "idb",
-    "database",
-    "websql",
-    "localstorage",
-    "html5"
-  ],
-  "author": "Guy Or",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/guyo13/idb_wrapper.js/issues"
-  },
-  "homepage": "https://github.com/guyo13/idb_wrapper.js#readme"
+    "name": "idb_wrapper.js",
+    "version": "2.0.0",
+    "description": "A lightweight wrapper around IndexedDB",
+    "main": "idb-wrapper.js",
+    "types": "./dist/idb-wrapper.d.ts",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "format": "prettier --write .",
+        "build": "tsc",
+        "clean": "tsc --build --clean"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/guyo13/idb_wrapper.js.git"
+    },
+    "keywords": [
+        "IndexedDB",
+        "idb",
+        "database",
+        "websql",
+        "localstorage",
+        "html5"
+    ],
+    "author": "Guy Or",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/guyo13/idb_wrapper.js/issues"
+    },
+    "homepage": "https://github.com/guyo13/idb_wrapper.js#readme",
+    "prettier": {
+        "trailingComma": "es5",
+        "tabWidth": 4,
+        "semi": false,
+        "singleQuote": true
+    },
+    "devDependencies": {
+        "prettier": "2.7.1",
+        "typescript": "^4.8.3"
+    }
 }
