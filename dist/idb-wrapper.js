@@ -1,0 +1,174 @@
+// Copyright (c) 2022, Guy Or Please see the AUTHORS file for details.
+// All rights reserved. Use of this source code is governed by the MIT
+// license that can be found in the LICENSE file.
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _IDBWrapper_indexedDB, _IDBWrapper_initialization, _IDBWrapper_ready, _IDBWrapper_isPersistent;
+import { IDBQueryType, } from './types';
+export default class IDBWrapper {
+    constructor(args) {
+        _IDBWrapper_indexedDB.set(this, void 0);
+        _IDBWrapper_initialization.set(this, void 0);
+        _IDBWrapper_ready.set(this, void 0);
+        _IDBWrapper_isPersistent.set(this, void 0);
+        __classPrivateFieldSet(this, _IDBWrapper_ready, false, "f");
+        __classPrivateFieldSet(this, _IDBWrapper_isPersistent, false, "f");
+        __classPrivateFieldSet(this, _IDBWrapper_initialization, this.initialize(args), "f");
+    }
+    initialize(args) {
+        const { dbName, dbVersion, upgradeHandler, persistent = false } = args;
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            if (persistent) {
+                try {
+                    __classPrivateFieldSet(this, _IDBWrapper_isPersistent, yield navigator.storage.persisted(), "f");
+                    if (!__classPrivateFieldGet(this, _IDBWrapper_isPersistent, "f")) {
+                        __classPrivateFieldSet(this, _IDBWrapper_isPersistent, yield navigator.storage.persist(), "f");
+                    }
+                }
+                catch (error) {
+                    __classPrivateFieldSet(this, _IDBWrapper_isPersistent, false, "f");
+                }
+            }
+            const idbFactory = IDBWrapper.indexedDBFactory;
+            if (!idbFactory) {
+                __classPrivateFieldSet(this, _IDBWrapper_ready, false, "f");
+                return reject({ error: 'IndexedDB not supported' });
+            }
+            const dbOpenReq = idbFactory.open(dbName, dbVersion);
+            dbOpenReq.onupgradeneeded = (upgradeEvent) => {
+                __classPrivateFieldSet(this, _IDBWrapper_indexedDB, dbOpenReq.result, "f");
+                __classPrivateFieldSet(this, _IDBWrapper_ready, true, "f");
+                upgradeHandler === null || upgradeHandler === void 0 ? void 0 : upgradeHandler.bind(this)(upgradeEvent);
+            };
+            dbOpenReq.onsuccess = () => {
+                __classPrivateFieldSet(this, _IDBWrapper_indexedDB, dbOpenReq.result, "f");
+                __classPrivateFieldSet(this, _IDBWrapper_ready, true, "f");
+                resolve({});
+            };
+            dbOpenReq.onerror = (errorEvent) => {
+                __classPrivateFieldSet(this, _IDBWrapper_ready, false, "f");
+                reject({ errorEvent });
+            };
+        }));
+    }
+    wait() {
+        return __classPrivateFieldGet(this, _IDBWrapper_initialization, "f");
+    }
+    get isReady() {
+        return __classPrivateFieldGet(this, _IDBWrapper_ready, "f");
+    }
+    get isPersistentStorage() {
+        return __classPrivateFieldGet(this, _IDBWrapper_ready, "f") && __classPrivateFieldGet(this, _IDBWrapper_isPersistent, "f");
+    }
+    static get indexedDBFactory() {
+        return (window.indexedDB ||
+            window.mozIndexedDB ||
+            window.webkitIndexedDB ||
+            window.msIndexedDB);
+    }
+    static get indexedDbKeyRange() {
+        return (window.IDBKeyRange ||
+            window.webkitIDBKeyRange ||
+            window.msIDBKeyRange);
+    }
+    /// Returns an IDBObjectStore from the database
+    getObjectStore(objectStoreName, mode = 'readonly') {
+        if (__classPrivateFieldGet(this, _IDBWrapper_indexedDB, "f")) {
+            return __classPrivateFieldGet(this, _IDBWrapper_indexedDB, "f")
+                .transaction(objectStoreName, mode)
+                .objectStore(objectStoreName);
+        }
+        throw 'IndexedDB is not ready';
+    }
+    /// Returns an IDBIndex object from the database
+    getIndex(objectStoreName, indexName, mode = 'readonly') {
+        const objectStore = this.getObjectStore(objectStoreName, mode);
+        const index = objectStore.index(indexName);
+        return index;
+    }
+    /// Opens an IDBCursor on an IDBIndex usings its name and its object store name.
+    openIndexCursor(objectStoreName, indexName, keyRangeSettings, mode) {
+        return new Promise((resolve, reject) => {
+            try {
+                const keyRange = IDBWrapper.createKeyRange(keyRangeSettings);
+                if (!keyRange) {
+                    return reject({ error: 'Failed creating a key range' });
+                }
+                const index = this.getIndex(objectStoreName, indexName, mode);
+                const cursorRequest = index.openCursor(keyRange, keyRangeSettings.direction);
+                cursorRequest.onerror = (errorEvent) => reject({ errorEvent });
+                cursorRequest.onsuccess = (successEvent) => resolve({ successEvent });
+            }
+            catch (error) {
+                return reject({ error });
+            }
+        });
+    }
+    /// Opens an IDBCursor on an IDBObjectStore usings its name.
+    openCursor(objectStoreName, keyRangeSettings, mode) {
+        return new Promise((resolve, reject) => {
+            try {
+                const keyRange = IDBWrapper.createKeyRange(keyRangeSettings);
+                if (!keyRange) {
+                    return reject({ error: 'Failed creating a key range' });
+                }
+                const objectStore = this.getObjectStore(objectStoreName, mode);
+                const cursorRequest = objectStore.openCursor(keyRange, keyRangeSettings.direction);
+                cursorRequest.onerror = (errorEvent) => reject({ errorEvent });
+                cursorRequest.onsuccess = (successEvent) => resolve({ successEvent });
+            }
+            catch (error) {
+                return reject({ error });
+            }
+        });
+    }
+    /// Creates an index during version upgrade.
+    static createIndex(objectStore, index) {
+        const { name, kp, options } = index;
+        return objectStore.createIndex(name, kp, options);
+    }
+}
+_IDBWrapper_indexedDB = new WeakMap(), _IDBWrapper_initialization = new WeakMap(), _IDBWrapper_ready = new WeakMap(), _IDBWrapper_isPersistent = new WeakMap();
+/// Returns an IDBKeyRange object based on the arguments passed.
+IDBWrapper.createKeyRange = function (keyRangeSettings) {
+    const { queryType, direction, lowerKeyPath, lowerExclusive = false, upperExclusive = false, upperBoundKeyPath = undefined, } = keyRangeSettings;
+    if (queryType == undefined ||
+        direction == undefined ||
+        lowerKeyPath == undefined) {
+        throw 'Invalid query arguments';
+    }
+    else if (queryType === IDBQueryType.Bound &&
+        upperBoundKeyPath == undefined) {
+        throw 'Upper bound values not specified for Bound query type';
+    }
+    const keyRangeConstructor = IDBWrapper.indexedDbKeyRange;
+    switch (queryType) {
+        case IDBQueryType.Only:
+            return keyRangeConstructor.only(lowerKeyPath);
+        case IDBQueryType.Bound:
+            return keyRangeConstructor.bound(lowerKeyPath, upperBoundKeyPath, lowerExclusive, upperExclusive);
+        case IDBQueryType.LowerBound:
+            return keyRangeConstructor.lowerBound(lowerKeyPath, lowerExclusive);
+        case IDBQueryType.UpperBound:
+            return keyRangeConstructor.upperBound(lowerKeyPath, upperExclusive);
+    }
+};
+export * from './types';
