@@ -30,6 +30,11 @@ export declare enum IDBQueryType {
     LowerBound = 2,
     UpperBound = 3
 }
+export declare enum IDBTransactionModes {
+    Readonly = "readonly",
+    Readwrite = "readwrite",
+    VersionChange = "versionchange"
+}
 declare global {
     interface Window {
         mozIndexedDB?: IDBFactory;
