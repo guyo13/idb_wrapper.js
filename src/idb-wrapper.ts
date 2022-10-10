@@ -48,7 +48,7 @@ export default class IDBWrapper {
             dbOpenReq.onupgradeneeded = (upgradeEvent) => {
                 this.#indexedDB = dbOpenReq.result
                 this.#ready = true
-                upgradeHandler?.bind(this)(upgradeEvent)
+                upgradeHandler?.bind(this)(upgradeEvent, this.#indexedDB)
             }
             dbOpenReq.onsuccess = () => {
                 this.#indexedDB = dbOpenReq.result

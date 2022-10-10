@@ -50,7 +50,8 @@ export interface KeyRangeSettings {
 
 export type IDBUpgradeHandler = (
     this: IDBWrapperInterface,
-    ev: IDBVersionChangeEvent
+    ev: IDBVersionChangeEvent,
+    db: IDBDatabase
 ) => any
 
 export enum IDBQueryType {
