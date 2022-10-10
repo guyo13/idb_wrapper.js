@@ -145,6 +145,27 @@ export default class IDBWrapper {
         const { name, kp, options } = index;
         return objectStore.createIndex(name, kp, options);
     }
+    /// Creates multiple indexes during version upgrade.
+    static createIndexes(objectStore, indexesObj) {
+        for (const indexConfig of indexesObj) {
+            try {
+                IDBWrapper.createIndex(objectStore, indexConfig);
+            }
+            catch (error) {
+                return { error };
+            }
+        }
+    }
+    /// Initializes an object store using a storeConfig specification.
+    /// Must be used only during version upgrade.
+    static initializeStore(indexedDB, storeConfig) {
+        const storeObject = indexedDB.createObjectStore(storeConfig.name, {
+            keyPath: storeConfig.keyPath,
+            autoIncrement: storeConfig.autoIncrement,
+        });
+        IDBWrapper.createIndexes(storeObject, storeConfig.indices);
+        return storeObject;
+    }
 }
 _IDBWrapper_indexedDB = new WeakMap(), _IDBWrapper_initialization = new WeakMap(), _IDBWrapper_ready = new WeakMap(), _IDBWrapper_isPersistent = new WeakMap();
 /// Returns an IDBKeyRange object based on the arguments passed.

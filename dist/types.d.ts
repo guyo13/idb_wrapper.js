@@ -15,6 +15,12 @@ export interface IndexConfig {
     kp: string | Array<string>;
     options: IDBIndexParameters;
 }
+export interface StoreConfig {
+    readonly name: string;
+    readonly keyPath: string | string[];
+    readonly autoIncrement: boolean;
+    readonly indices: IndexConfig[];
+}
 export interface KeyRangeSettings {
     queryType: IDBQueryType;
     direction: IDBCursorDirection;

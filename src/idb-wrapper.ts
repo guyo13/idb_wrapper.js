@@ -7,6 +7,7 @@ import {
     IndexConfig,
     IDBQueryType,
     KeyRangeSettings,
+    StoreConfig,
 } from './types'
 
 export default class IDBWrapper {
@@ -178,6 +179,34 @@ export default class IDBWrapper {
     ): IDBIndex {
         const { name, kp, options } = index
         return objectStore.createIndex(name, kp, options)
+    }
+
+    /// Creates multiple indexes during version upgrade.
+    static createIndexes(
+        objectStore: IDBObjectStore,
+        indexesObj: IndexConfig[]
+    ): { error?: any } | undefined {
+        for (const indexConfig of indexesObj) {
+            try {
+                IDBWrapper.createIndex(objectStore, indexConfig)
+            } catch (error) {
+                return { error }
+            }
+        }
+    }
+
+    /// Initializes an object store using a storeConfig specification.
+    /// Must be used only during version upgrade.
+    static initializeStore(
+        indexedDB: IDBDatabase,
+        storeConfig: StoreConfig
+    ): IDBObjectStore {
+        const storeObject = indexedDB.createObjectStore(storeConfig.name, {
+            keyPath: storeConfig.keyPath,
+            autoIncrement: storeConfig.autoIncrement,
+        })
+        IDBWrapper.createIndexes(storeObject, storeConfig.indices)
+        return storeObject
     }
 
     /// Returns an IDBKeyRange object based on the arguments passed.

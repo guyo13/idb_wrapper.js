@@ -34,11 +34,20 @@ export interface IDBWrapperArgs {
     upgradeHandler: IDBUpgradeHandler
     persistent: boolean
 }
+
 export interface IndexConfig {
     name: string
     kp: string | Array<string>
     options: IDBIndexParameters
 }
+
+export interface StoreConfig {
+    readonly name: string
+    readonly keyPath: string | string[]
+    readonly autoIncrement: boolean
+    readonly indices: IndexConfig[]
+}
+
 export interface KeyRangeSettings {
     queryType: IDBQueryType
     direction: IDBCursorDirection
