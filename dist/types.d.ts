@@ -23,7 +23,7 @@ export interface KeyRangeSettings {
     upperExclusive?: boolean;
     upperBoundKeyPath?: any;
 }
-export declare type IDBUpgradeHandler = (this: IDBWrapperInterface, ev: IDBVersionChangeEvent) => any;
+export declare type IDBUpgradeHandler = (this: IDBWrapperInterface, ev: IDBVersionChangeEvent, db: IDBDatabase) => any;
 export declare enum IDBQueryType {
     Only = 0,
     Bound = 1,

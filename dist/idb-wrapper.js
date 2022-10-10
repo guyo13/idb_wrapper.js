@@ -56,7 +56,7 @@ export default class IDBWrapper {
             dbOpenReq.onupgradeneeded = (upgradeEvent) => {
                 __classPrivateFieldSet(this, _IDBWrapper_indexedDB, dbOpenReq.result, "f");
                 __classPrivateFieldSet(this, _IDBWrapper_ready, true, "f");
-                upgradeHandler === null || upgradeHandler === void 0 ? void 0 : upgradeHandler.bind(this)(upgradeEvent);
+                upgradeHandler === null || upgradeHandler === void 0 ? void 0 : upgradeHandler.bind(this)(upgradeEvent, __classPrivateFieldGet(this, _IDBWrapper_indexedDB, "f"));
             };
             dbOpenReq.onsuccess = () => {
                 __classPrivateFieldSet(this, _IDBWrapper_indexedDB, dbOpenReq.result, "f");
