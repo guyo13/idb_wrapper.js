@@ -6,6 +6,7 @@ export default class IDBWrapper {
     wait(): Promise<any>;
     get isReady(): boolean;
     get isPersistentStorage(): boolean;
+    get idbInstance(): IDBDatabase | undefined;
     static get indexedDBFactory(): IDBFactory;
     static get indexedDbKeyRange(): {
         new (): IDBKeyRange;

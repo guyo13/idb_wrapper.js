@@ -75,6 +75,10 @@ export default class IDBWrapper {
         return this.#ready && this.#isPersistent
     }
 
+    get idbInstance(): IDBDatabase | undefined {
+        return this.#indexedDB
+    }
+
     static get indexedDBFactory(): IDBFactory {
         return (
             window.indexedDB ||

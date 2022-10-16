@@ -78,6 +78,9 @@ export default class IDBWrapper {
     get isPersistentStorage() {
         return __classPrivateFieldGet(this, _IDBWrapper_ready, "f") && __classPrivateFieldGet(this, _IDBWrapper_isPersistent, "f");
     }
+    get idbInstance() {
+        return __classPrivateFieldGet(this, _IDBWrapper_indexedDB, "f");
+    }
     static get indexedDBFactory() {
         return (window.indexedDB ||
             window.mozIndexedDB ||
