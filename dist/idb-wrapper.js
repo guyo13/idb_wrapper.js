@@ -23,7 +23,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 };
 var _IDBWrapper_indexedDB, _IDBWrapper_initialization, _IDBWrapper_ready, _IDBWrapper_isPersistent;
 import { IDBQueryType, } from './types';
-export default class IDBWrapper {
+class IDBWrapper {
     constructor(args) {
         _IDBWrapper_indexedDB.set(this, void 0);
         _IDBWrapper_initialization.set(this, void 0);
@@ -108,38 +108,48 @@ export default class IDBWrapper {
         return index;
     }
     /// Opens an IDBCursor on an IDBIndex usings its name and its object store name.
-    openIndexCursor(objectStoreName, indexName, keyRangeSettings, mode) {
+    openIndexCursor(objectStoreName, indexName, mode, keyRangeSettings) {
         return new Promise((resolve, reject) => {
             try {
-                const keyRange = IDBWrapper.createKeyRange(keyRangeSettings);
-                if (!keyRange) {
-                    return reject({ error: 'Failed creating a key range' });
+                let keyRange;
+                if (keyRangeSettings) {
+                    keyRange = IDBWrapper.createKeyRange(keyRangeSettings);
+                    if (!keyRange) {
+                        return reject({ error: 'Failed creating a key range' });
+                    }
                 }
                 const index = this.getIndex(objectStoreName, indexName, mode);
-                const cursorRequest = index.openCursor(keyRange, keyRangeSettings.direction);
-                cursorRequest.onerror = (errorEvent) => reject({ errorEvent });
-                cursorRequest.onsuccess = (successEvent) => resolve({ successEvent });
+                const cursorRequest = keyRangeSettings
+                    ? index.openCursor(keyRange, keyRangeSettings.direction)
+                    : index.openCursor();
+                cursorRequest.onerror = (errorEvent) => reject(errorEvent);
+                cursorRequest.onsuccess = (successEvent) => resolve(successEvent.target.result);
             }
             catch (error) {
-                return reject({ error });
+                return reject(error);
             }
         });
     }
     /// Opens an IDBCursor on an IDBObjectStore usings its name.
-    openCursor(objectStoreName, keyRangeSettings, mode) {
+    openCursor(objectStoreName, mode, keyRangeSettings) {
         return new Promise((resolve, reject) => {
             try {
-                const keyRange = IDBWrapper.createKeyRange(keyRangeSettings);
-                if (!keyRange) {
-                    return reject({ error: 'Failed creating a key range' });
+                let keyRange;
+                if (keyRangeSettings) {
+                    keyRange = IDBWrapper.createKeyRange(keyRangeSettings);
+                    if (!keyRange) {
+                        return reject({ error: 'Failed creating a key range' });
+                    }
                 }
                 const objectStore = this.getObjectStore(objectStoreName, mode);
-                const cursorRequest = objectStore.openCursor(keyRange, keyRangeSettings.direction);
-                cursorRequest.onerror = (errorEvent) => reject({ errorEvent });
-                cursorRequest.onsuccess = (successEvent) => resolve({ successEvent });
+                const cursorRequest = keyRangeSettings
+                    ? objectStore.openCursor(keyRange, keyRangeSettings.direction)
+                    : objectStore.openCursor();
+                cursorRequest.onerror = (errorEvent) => reject(errorEvent);
+                cursorRequest.onsuccess = (successEvent) => resolve(successEvent.target.result);
             }
             catch (error) {
-                return reject({ error });
+                return reject(error);
             }
         });
     }
@@ -195,4 +205,5 @@ IDBWrapper.createKeyRange = function (keyRangeSettings) {
             return keyRangeConstructor.upperBound(lowerKeyPath, upperExclusive);
     }
 };
+export default IDBWrapper;
 export * from './types';

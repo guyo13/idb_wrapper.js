@@ -1,4 +1,4 @@
-import { IDBWrapperArgs, IndexConfig, KeyRangeSettings, StoreConfig } from './types';
+import { IDBWrapperArgs, IndexConfig, KeyRangeSettings, StoreConfig, IDBCursorWithTypedValue } from './types';
 export default class IDBWrapper {
     #private;
     constructor(args: IDBWrapperArgs);
@@ -18,8 +18,8 @@ export default class IDBWrapper {
     };
     getObjectStore(objectStoreName: string, mode?: IDBTransactionMode): IDBObjectStore;
     getIndex(objectStoreName: string, indexName: string, mode?: IDBTransactionMode): IDBIndex;
-    openIndexCursor(objectStoreName: string, indexName: string, keyRangeSettings: KeyRangeSettings, mode: IDBTransactionMode): Promise<any>;
-    openCursor(objectStoreName: string, keyRangeSettings: KeyRangeSettings, mode: IDBTransactionMode): Promise<any>;
+    openIndexCursor<T>(objectStoreName: string, indexName: string, mode: IDBTransactionMode, keyRangeSettings?: KeyRangeSettings): Promise<IDBCursorWithTypedValue<T>>;
+    openCursor<T>(objectStoreName: string, mode: IDBTransactionMode, keyRangeSettings?: KeyRangeSettings): Promise<IDBCursorWithTypedValue<T>>;
     static createIndex(objectStore: IDBObjectStore, index: IndexConfig): IDBIndex;
     static createIndexes(objectStore: IDBObjectStore, indexesObj: IndexConfig[]): {
         error?: any;

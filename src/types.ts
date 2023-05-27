@@ -14,18 +14,39 @@ export interface IDBWrapperInterface {
         mode: IDBTransactionMode
     ): IDBIndex
 
-    openIndexCursor(
+    openIndexCursor<T>(
         objectStoreName: string,
         indexName: string,
-        keyRangeSettings: KeyRangeSettings,
-        mode: IDBTransactionMode
-    ): Promise<any>
+        mode: IDBTransactionMode,
+        keyRangeSettings?: KeyRangeSettings
+    ): Promise<IDBCursorWithTypedValue<T>>
 
-    openCursor(
+    openCursor<T>(
         objectStoreName: string,
-        keyRangeSettings: KeyRangeSettings,
-        mode: IDBTransactionMode
-    ): Promise<any>
+        mode: IDBTransactionMode,
+        keyRangeSettings?: KeyRangeSettings
+    ): Promise<IDBCursorWithTypedValue<T>>
+}
+
+/** Represents an event target whose result has a specfic type. */
+export interface TypedEventTarget<T> extends EventTarget {
+    result: T
+}
+
+/** Represents an IndexedDB Cursor with value whose value has a specfic type. */
+export interface IDBCursorWithTypedValue<T> extends IDBCursorWithValue {
+    /** Returns the cursor's current value. */
+    readonly value: T
+}
+
+/** Represents an IndexedDB Cursor event whose result is a typed IndexedDB Cursor with value.  */
+export interface CursorEventWithValue<T> extends Event {
+    target: TypedEventTarget<IDBCursorWithTypedValue<T>>
+}
+
+/** Represents an IndexedDB Event whose result is an IDBCursor. */
+export interface CursorEvent extends Event {
+    target: TypedEventTarget<IDBCursor>
 }
 
 export interface IDBWrapperArgs {

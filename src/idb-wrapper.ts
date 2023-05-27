@@ -8,6 +8,8 @@ import {
     IDBQueryType,
     KeyRangeSettings,
     StoreConfig,
+    CursorEventWithValue,
+    IDBCursorWithTypedValue,
 } from './types'
 
 export default class IDBWrapper {
@@ -121,57 +123,69 @@ export default class IDBWrapper {
     }
 
     /// Opens an IDBCursor on an IDBIndex usings its name and its object store name.
-    openIndexCursor(
+    openIndexCursor<T>(
         objectStoreName: string,
         indexName: string,
-        keyRangeSettings: KeyRangeSettings,
-        mode: IDBTransactionMode
-    ): Promise<any> {
+        mode: IDBTransactionMode,
+        keyRangeSettings?: KeyRangeSettings
+    ): Promise<IDBCursorWithTypedValue<T>> {
         return new Promise((resolve, reject) => {
             try {
-                const keyRange = IDBWrapper.createKeyRange(keyRangeSettings)
-                if (!keyRange) {
-                    return reject({ error: 'Failed creating a key range' })
+                let keyRange
+                if (keyRangeSettings) {
+                    keyRange = IDBWrapper.createKeyRange(keyRangeSettings)
+                    if (!keyRange) {
+                        return reject({ error: 'Failed creating a key range' })
+                    }
                 }
                 const index: IDBIndex = this.getIndex(
                     objectStoreName,
                     indexName,
                     mode
                 )
-                const cursorRequest = index.openCursor(
-                    keyRange,
-                    keyRangeSettings.direction
-                )
-                cursorRequest.onerror = (errorEvent) => reject({ errorEvent })
+                const cursorRequest = keyRangeSettings
+                    ? index.openCursor(keyRange, keyRangeSettings.direction)
+                    : index.openCursor()
+                cursorRequest.onerror = (errorEvent) => reject(errorEvent)
                 cursorRequest.onsuccess = (successEvent) =>
-                    resolve({ successEvent })
+                    resolve(
+                        (successEvent as CursorEventWithValue<T>).target.result
+                    )
             } catch (error) {
-                return reject({ error })
+                return reject(error)
             }
         })
     }
+
     /// Opens an IDBCursor on an IDBObjectStore usings its name.
-    openCursor(
+    openCursor<T>(
         objectStoreName: string,
-        keyRangeSettings: KeyRangeSettings,
-        mode: IDBTransactionMode
-    ): Promise<any> {
+        mode: IDBTransactionMode,
+        keyRangeSettings?: KeyRangeSettings
+    ): Promise<IDBCursorWithTypedValue<T>> {
         return new Promise((resolve, reject) => {
             try {
-                const keyRange = IDBWrapper.createKeyRange(keyRangeSettings)
-                if (!keyRange) {
-                    return reject({ error: 'Failed creating a key range' })
+                let keyRange
+                if (keyRangeSettings) {
+                    keyRange = IDBWrapper.createKeyRange(keyRangeSettings)
+                    if (!keyRange) {
+                        return reject({ error: 'Failed creating a key range' })
+                    }
                 }
                 const objectStore = this.getObjectStore(objectStoreName, mode)
-                const cursorRequest = objectStore.openCursor(
-                    keyRange,
-                    keyRangeSettings.direction
-                )
-                cursorRequest.onerror = (errorEvent) => reject({ errorEvent })
+                const cursorRequest = keyRangeSettings
+                    ? objectStore.openCursor(
+                          keyRange,
+                          keyRangeSettings.direction
+                      )
+                    : objectStore.openCursor()
+                cursorRequest.onerror = (errorEvent) => reject(errorEvent)
                 cursorRequest.onsuccess = (successEvent) =>
-                    resolve({ successEvent })
+                    resolve(
+                        (successEvent as CursorEventWithValue<T>).target.result
+                    )
             } catch (error) {
-                return reject({ error })
+                return reject(error)
             }
         })
     }
