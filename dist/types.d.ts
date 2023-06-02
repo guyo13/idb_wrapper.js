@@ -41,10 +41,10 @@ export interface StoreConfig {
 export interface KeyRangeSettings {
     queryType: IDBQueryType;
     direction: IDBCursorDirection;
-    lowerKeyPath: any;
+    lowerKeyPath: IDBValidKey;
     lowerExclusive?: boolean;
     upperExclusive?: boolean;
-    upperBoundKeyPath?: any;
+    upperBoundKeyPath?: IDBValidKey;
 }
 export type IDBUpgradeHandler = (this: IDBWrapperInterface, ev: IDBVersionChangeEvent, db: IDBDatabase) => any;
 export declare enum IDBQueryType {
