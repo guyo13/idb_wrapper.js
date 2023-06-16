@@ -22,7 +22,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
 var _IDBWrapper_indexedDB, _IDBWrapper_initialization, _IDBWrapper_ready, _IDBWrapper_isPersistent;
-import { IDBQueryType } from './types';
+import { IDBQueryType, IDBTransactionModes } from './types';
 class IDBWrapper {
     constructor(args) {
         _IDBWrapper_indexedDB.set(this, void 0);
@@ -151,6 +151,46 @@ class IDBWrapper {
             catch (error) {
                 return reject(error);
             }
+        });
+    }
+    getAll(storeName) {
+        return new Promise((resolve, reject) => {
+            const store = this.getObjectStore(storeName);
+            const getAllRequest = store.getAll();
+            getAllRequest.onsuccess = (successEvent) => {
+                resolve(successEvent.target.result);
+            };
+            getAllRequest.onerror = reject;
+        });
+    }
+    get(storeName, query) {
+        return new Promise((resolve, reject) => {
+            const store = this.getObjectStore(storeName);
+            const getRequest = store.get(query);
+            getRequest.onsuccess = (successEvent) => {
+                resolve(successEvent.target.result);
+            };
+            getRequest.onerror = reject;
+        });
+    }
+    add(storeName, object) {
+        return new Promise((resolve, reject) => {
+            const store = this.getObjectStore(storeName, IDBTransactionModes.Readwrite);
+            const addRequest = store.add(object);
+            addRequest.onsuccess = () => {
+                resolve();
+            };
+            addRequest.onerror = reject;
+        });
+    }
+    delete(storeName, query) {
+        return new Promise((resolve, reject) => {
+            const store = this.getObjectStore(storeName, IDBTransactionModes.Readwrite);
+            const deleteRequest = store.delete(query);
+            deleteRequest.onsuccess = () => {
+                resolve();
+            };
+            deleteRequest.onerror = reject;
         });
     }
     /// Creates an index during version upgrade.

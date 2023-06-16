@@ -12,12 +12,16 @@ export interface IDBWrapperInterface {
     getIndex(objectStoreName: string, indexName: string, mode: IDBTransactionMode): IDBIndex;
     openIndexCursor<T>(objectStoreName: string, indexName: string, mode: IDBTransactionMode, keyRangeSettings?: KeyRangeSettings): Promise<IDBCursorWithTypedValue<T>>;
     openCursor<T>(objectStoreName: string, mode: IDBTransactionMode, keyRangeSettings?: KeyRangeSettings): Promise<IDBCursorWithTypedValue<T>>;
+    getAll<T>(storeName: string): Promise<T[] | null>;
+    get<T>(storeName: string, query: IDBValidKey | IDBKeyRange): Promise<T | null>;
+    add<T>(storeName: string, object: T): Promise<void>;
+    delete(storeName: string, query: IDBValidKey | IDBKeyRange): Promise<void>;
 }
-/** Represents an event target whose result has a specific type. */
+/** A typed version of a DOM EventTarget object. */
 export interface TypedEventTarget<T> extends EventTarget {
     result: T;
 }
-/** Represents an IndexedDB Cursor with value whose value has a specfic type. */
+/** A typed version of an IndexedDB Cursor-With-Value object. */
 export interface IDBCursorWithTypedValue<T> extends IDBCursorWithValue {
     /** Returns the cursor's current value. */
     readonly value: T;

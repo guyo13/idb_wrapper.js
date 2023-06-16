@@ -6,13 +6,14 @@ import type {
     CursorEventWithValue,
     IDBCursorWithTypedValue,
     IDBWrapperArgs,
+    IDBWrapperInterface,
     IndexConfig,
     KeyRangeSettings,
     StoreConfig,
 } from './types'
-import { IDBQueryType } from './types'
+import { IDBQueryType, IDBTransactionModes, TypedEventTarget } from './types'
 
-export default class IDBWrapper {
+export default class IDBWrapper implements IDBWrapperInterface {
     #indexedDB?: IDBDatabase
     readonly #initialization: Promise<void>
     #ready: boolean
@@ -181,6 +182,61 @@ export default class IDBWrapper {
             } catch (error) {
                 return reject(error)
             }
+        })
+    }
+
+    getAll<T>(storeName: string): Promise<T[] | null> {
+        return new Promise((resolve, reject) => {
+            const store = this.getObjectStore(storeName)
+            const getAllRequest = store.getAll()
+
+            getAllRequest.onsuccess = (successEvent: Event) => {
+                resolve((successEvent.target as TypedEventTarget<T[]>).result)
+            }
+            getAllRequest.onerror = reject
+        })
+    }
+
+    get<T>(
+        storeName: string,
+        query: IDBValidKey | IDBKeyRange
+    ): Promise<T | null> {
+        return new Promise((resolve, reject) => {
+            const store = this.getObjectStore(storeName)
+            const getRequest = store.get(query)
+
+            getRequest.onsuccess = (successEvent: Event) => {
+                resolve((successEvent.target as TypedEventTarget<T>).result)
+            }
+            getRequest.onerror = reject
+        })
+    }
+
+    add<T>(storeName: string, object: T): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const store = this.getObjectStore(
+                storeName,
+                IDBTransactionModes.Readwrite
+            )
+            const addRequest = store.add(object)
+            addRequest.onsuccess = () => {
+                resolve()
+            }
+            addRequest.onerror = reject
+        })
+    }
+
+    delete(storeName: string, query: IDBValidKey | IDBKeyRange): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const store = this.getObjectStore(
+                storeName,
+                IDBTransactionModes.Readwrite
+            )
+            const deleteRequest = store.delete(query)
+            deleteRequest.onsuccess = () => {
+                resolve()
+            }
+            deleteRequest.onerror = reject
         })
     }
 
