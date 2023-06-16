@@ -22,7 +22,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
 var _IDBWrapper_indexedDB, _IDBWrapper_initialization, _IDBWrapper_ready, _IDBWrapper_isPersistent;
-import { IDBQueryType, } from './types';
+import { IDBQueryType } from './types';
 class IDBWrapper {
     constructor(args) {
         _IDBWrapper_indexedDB.set(this, void 0);

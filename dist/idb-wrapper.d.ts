@@ -1,4 +1,4 @@
-import { IDBCursorWithTypedValue, IDBWrapperArgs, IndexConfig, KeyRangeSettings, StoreConfig } from './types';
+import type { IDBCursorWithTypedValue, IDBWrapperArgs, IndexConfig, KeyRangeSettings, StoreConfig } from './types';
 export default class IDBWrapper {
     #private;
     constructor(args: IDBWrapperArgs);
