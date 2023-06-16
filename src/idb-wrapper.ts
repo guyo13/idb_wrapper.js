@@ -3,18 +3,18 @@
 // license that can be found in the LICENSE file.
 
 import {
-    IDBWrapperArgs,
-    IndexConfig,
-    IDBQueryType,
-    KeyRangeSettings,
-    StoreConfig,
     CursorEventWithValue,
     IDBCursorWithTypedValue,
+    IDBQueryType,
+    IDBWrapperArgs,
+    IndexConfig,
+    KeyRangeSettings,
+    StoreConfig,
 } from './types'
 
 export default class IDBWrapper {
     #indexedDB?: IDBDatabase
-    #initialization: Promise<any>
+    readonly #initialization: Promise<void>
     #ready: boolean
     #isPersistent: boolean
 
@@ -24,30 +24,26 @@ export default class IDBWrapper {
         this.#initialization = this.initialize(args)
     }
 
-    private initialize(args: IDBWrapperArgs): Promise<any> {
+    private async initialize(args: IDBWrapperArgs): Promise<void> {
         const { dbName, dbVersion, upgradeHandler, persistent = false } = args
-
-        return new Promise(async (resolve, reject) => {
-            if (persistent) {
-                try {
-                    this.#isPersistent = await navigator.storage.persisted()
-                    if (!this.#isPersistent) {
-                        this.#isPersistent = await navigator.storage.persist()
-                    }
-                } catch (error) {
-                    this.#isPersistent = false
+        if (persistent) {
+            try {
+                this.#isPersistent = await navigator.storage.persisted()
+                if (!this.#isPersistent) {
+                    this.#isPersistent = await navigator.storage.persist()
                 }
+            } catch (error) {
+                this.#isPersistent = false
             }
+        }
 
+        return new Promise((resolve, reject) => {
             const idbFactory = IDBWrapper.indexedDBFactory
             if (!idbFactory) {
                 this.#ready = false
                 return reject({ error: 'IndexedDB not supported' })
             }
-            const dbOpenReq: IDBOpenDBRequest = idbFactory.open(
-                dbName,
-                dbVersion
-            )
+            const dbOpenReq = idbFactory.open(dbName, dbVersion)
             dbOpenReq.onupgradeneeded = (upgradeEvent) => {
                 this.#indexedDB = dbOpenReq.result
                 this.#ready = true
@@ -56,16 +52,16 @@ export default class IDBWrapper {
             dbOpenReq.onsuccess = () => {
                 this.#indexedDB = dbOpenReq.result
                 this.#ready = true
-                resolve({})
+                resolve()
             }
             dbOpenReq.onerror = (errorEvent) => {
                 this.#ready = false
-                reject({ errorEvent })
+                reject(errorEvent)
             }
         })
     }
 
-    wait(): Promise<any> {
+    wait(): Promise<void> {
         return this.#initialization
     }
 
@@ -117,12 +113,10 @@ export default class IDBWrapper {
         indexName: string,
         mode: IDBTransactionMode = 'readonly'
     ): IDBIndex {
-        const objectStore = this.getObjectStore(objectStoreName, mode)
-        const index = objectStore.index(indexName)
-        return index
+        return this.getObjectStore(objectStoreName, mode).index(indexName)
     }
 
-    /// Opens an IDBCursor on an IDBIndex usings its name and its object store name.
+    /// Opens a cursor on an index in an object store.
     openIndexCursor<T>(
         objectStoreName: string,
         indexName: string,
@@ -146,7 +140,7 @@ export default class IDBWrapper {
                 const cursorRequest = keyRangeSettings
                     ? index.openCursor(keyRange, keyRangeSettings.direction)
                     : index.openCursor()
-                cursorRequest.onerror = (errorEvent) => reject(errorEvent)
+                cursorRequest.onerror = reject
                 cursorRequest.onsuccess = (successEvent) =>
                     resolve(
                         (successEvent as CursorEventWithValue<T>).target.result
@@ -157,7 +151,7 @@ export default class IDBWrapper {
         })
     }
 
-    /// Opens an IDBCursor on an IDBObjectStore usings its name.
+    /// Opens a cursor on an object store.
     openCursor<T>(
         objectStoreName: string,
         mode: IDBTransactionMode,
@@ -179,7 +173,7 @@ export default class IDBWrapper {
                           keyRangeSettings.direction
                       )
                     : objectStore.openCursor()
-                cursorRequest.onerror = (errorEvent) => reject(errorEvent)
+                cursorRequest.onerror = reject
                 cursorRequest.onsuccess = (successEvent) =>
                     resolve(
                         (successEvent as CursorEventWithValue<T>).target.result
@@ -214,7 +208,7 @@ export default class IDBWrapper {
     }
 
     /// Initializes an object store using a storeConfig specification.
-    /// Must be used only during version upgrade.
+    /// Can only be used during version upgrade.
     static initializeStore(
         indexedDB: IDBDatabase,
         storeConfig: StoreConfig

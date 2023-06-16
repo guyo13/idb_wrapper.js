@@ -1,10 +1,19 @@
+declare global {
+    interface Window {
+        mozIndexedDB?: IDBFactory;
+        webkitIndexedDB?: IDBFactory;
+        msIndexedDB?: IDBFactory;
+        webkitIDBKeyRange?: IDBKeyRange;
+        msIDBKeyRange?: IDBKeyRange;
+    }
+}
 export interface IDBWrapperInterface {
     getObjectStore(objectStoreName: string, mode: IDBTransactionMode): IDBObjectStore;
     getIndex(objectStoreName: string, indexName: string, mode: IDBTransactionMode): IDBIndex;
     openIndexCursor<T>(objectStoreName: string, indexName: string, mode: IDBTransactionMode, keyRangeSettings?: KeyRangeSettings): Promise<IDBCursorWithTypedValue<T>>;
     openCursor<T>(objectStoreName: string, mode: IDBTransactionMode, keyRangeSettings?: KeyRangeSettings): Promise<IDBCursorWithTypedValue<T>>;
 }
-/** Represents an event target whose result has a specfic type. */
+/** Represents an event target whose result has a specific type. */
 export interface TypedEventTarget<T> extends EventTarget {
     result: T;
 }
@@ -46,7 +55,7 @@ export interface KeyRangeSettings {
     upperExclusive?: boolean;
     upperBoundKeyPath?: IDBValidKey;
 }
-export type IDBUpgradeHandler = (this: IDBWrapperInterface, ev: IDBVersionChangeEvent, db: IDBDatabase) => any;
+export type IDBUpgradeHandler = (this: IDBWrapperInterface, ev: IDBVersionChangeEvent, db: IDBDatabase) => void;
 export declare enum IDBQueryType {
     Only = 0,
     Bound = 1,
@@ -57,14 +66,5 @@ export declare enum IDBTransactionModes {
     Readonly = "readonly",
     Readwrite = "readwrite",
     VersionChange = "versionchange"
-}
-declare global {
-    interface Window {
-        mozIndexedDB?: IDBFactory;
-        webkitIndexedDB?: IDBFactory;
-        msIndexedDB?: IDBFactory;
-        webkitIDBKeyRange?: IDBKeyRange;
-        msIDBKeyRange?: IDBKeyRange;
-    }
 }
 //# sourceMappingURL=types.d.ts.map

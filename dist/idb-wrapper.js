@@ -34,8 +34,8 @@ class IDBWrapper {
         __classPrivateFieldSet(this, _IDBWrapper_initialization, this.initialize(args), "f");
     }
     initialize(args) {
-        const { dbName, dbVersion, upgradeHandler, persistent = false } = args;
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { dbName, dbVersion, upgradeHandler, persistent = false } = args;
             if (persistent) {
                 try {
                     __classPrivateFieldSet(this, _IDBWrapper_isPersistent, yield navigator.storage.persisted(), "f");
@@ -47,27 +47,29 @@ class IDBWrapper {
                     __classPrivateFieldSet(this, _IDBWrapper_isPersistent, false, "f");
                 }
             }
-            const idbFactory = IDBWrapper.indexedDBFactory;
-            if (!idbFactory) {
-                __classPrivateFieldSet(this, _IDBWrapper_ready, false, "f");
-                return reject({ error: 'IndexedDB not supported' });
-            }
-            const dbOpenReq = idbFactory.open(dbName, dbVersion);
-            dbOpenReq.onupgradeneeded = (upgradeEvent) => {
-                __classPrivateFieldSet(this, _IDBWrapper_indexedDB, dbOpenReq.result, "f");
-                __classPrivateFieldSet(this, _IDBWrapper_ready, true, "f");
-                upgradeHandler === null || upgradeHandler === void 0 ? void 0 : upgradeHandler.bind(this)(upgradeEvent, __classPrivateFieldGet(this, _IDBWrapper_indexedDB, "f"));
-            };
-            dbOpenReq.onsuccess = () => {
-                __classPrivateFieldSet(this, _IDBWrapper_indexedDB, dbOpenReq.result, "f");
-                __classPrivateFieldSet(this, _IDBWrapper_ready, true, "f");
-                resolve({});
-            };
-            dbOpenReq.onerror = (errorEvent) => {
-                __classPrivateFieldSet(this, _IDBWrapper_ready, false, "f");
-                reject({ errorEvent });
-            };
-        }));
+            return new Promise((resolve, reject) => {
+                const idbFactory = IDBWrapper.indexedDBFactory;
+                if (!idbFactory) {
+                    __classPrivateFieldSet(this, _IDBWrapper_ready, false, "f");
+                    return reject({ error: 'IndexedDB not supported' });
+                }
+                const dbOpenReq = idbFactory.open(dbName, dbVersion);
+                dbOpenReq.onupgradeneeded = (upgradeEvent) => {
+                    __classPrivateFieldSet(this, _IDBWrapper_indexedDB, dbOpenReq.result, "f");
+                    __classPrivateFieldSet(this, _IDBWrapper_ready, true, "f");
+                    upgradeHandler === null || upgradeHandler === void 0 ? void 0 : upgradeHandler.bind(this)(upgradeEvent, __classPrivateFieldGet(this, _IDBWrapper_indexedDB, "f"));
+                };
+                dbOpenReq.onsuccess = () => {
+                    __classPrivateFieldSet(this, _IDBWrapper_indexedDB, dbOpenReq.result, "f");
+                    __classPrivateFieldSet(this, _IDBWrapper_ready, true, "f");
+                    resolve();
+                };
+                dbOpenReq.onerror = (errorEvent) => {
+                    __classPrivateFieldSet(this, _IDBWrapper_ready, false, "f");
+                    reject(errorEvent);
+                };
+            });
+        });
     }
     wait() {
         return __classPrivateFieldGet(this, _IDBWrapper_initialization, "f");
@@ -103,11 +105,9 @@ class IDBWrapper {
     }
     /// Returns an IDBIndex object from the database
     getIndex(objectStoreName, indexName, mode = 'readonly') {
-        const objectStore = this.getObjectStore(objectStoreName, mode);
-        const index = objectStore.index(indexName);
-        return index;
+        return this.getObjectStore(objectStoreName, mode).index(indexName);
     }
-    /// Opens an IDBCursor on an IDBIndex usings its name and its object store name.
+    /// Opens a cursor on an index in an object store.
     openIndexCursor(objectStoreName, indexName, mode, keyRangeSettings) {
         return new Promise((resolve, reject) => {
             try {
@@ -122,7 +122,7 @@ class IDBWrapper {
                 const cursorRequest = keyRangeSettings
                     ? index.openCursor(keyRange, keyRangeSettings.direction)
                     : index.openCursor();
-                cursorRequest.onerror = (errorEvent) => reject(errorEvent);
+                cursorRequest.onerror = reject;
                 cursorRequest.onsuccess = (successEvent) => resolve(successEvent.target.result);
             }
             catch (error) {
@@ -130,7 +130,7 @@ class IDBWrapper {
             }
         });
     }
-    /// Opens an IDBCursor on an IDBObjectStore usings its name.
+    /// Opens a cursor on an object store.
     openCursor(objectStoreName, mode, keyRangeSettings) {
         return new Promise((resolve, reject) => {
             try {
@@ -145,7 +145,7 @@ class IDBWrapper {
                 const cursorRequest = keyRangeSettings
                     ? objectStore.openCursor(keyRange, keyRangeSettings.direction)
                     : objectStore.openCursor();
-                cursorRequest.onerror = (errorEvent) => reject(errorEvent);
+                cursorRequest.onerror = reject;
                 cursorRequest.onsuccess = (successEvent) => resolve(successEvent.target.result);
             }
             catch (error) {
@@ -170,7 +170,7 @@ class IDBWrapper {
         }
     }
     /// Initializes an object store using a storeConfig specification.
-    /// Must be used only during version upgrade.
+    /// Can only be used during version upgrade.
     static initializeStore(indexedDB, storeConfig) {
         const storeObject = indexedDB.createObjectStore(storeConfig.name, {
             keyPath: storeConfig.keyPath,

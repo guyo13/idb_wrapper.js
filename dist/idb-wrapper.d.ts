@@ -1,9 +1,9 @@
-import { IDBWrapperArgs, IndexConfig, KeyRangeSettings, StoreConfig, IDBCursorWithTypedValue } from './types';
+import { IDBCursorWithTypedValue, IDBWrapperArgs, IndexConfig, KeyRangeSettings, StoreConfig } from './types';
 export default class IDBWrapper {
     #private;
     constructor(args: IDBWrapperArgs);
     private initialize;
-    wait(): Promise<any>;
+    wait(): Promise<void>;
     get isReady(): boolean;
     get isPersistentStorage(): boolean;
     get idbInstance(): IDBDatabase | undefined;

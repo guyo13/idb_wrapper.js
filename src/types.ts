@@ -2,6 +2,16 @@
 // All rights reserved. Use of this source code is governed by the MIT
 // license that can be found in the LICENSE file.
 
+declare global {
+    interface Window {
+        mozIndexedDB?: IDBFactory
+        webkitIndexedDB?: IDBFactory
+        msIndexedDB?: IDBFactory
+        webkitIDBKeyRange?: IDBKeyRange
+        msIDBKeyRange?: IDBKeyRange
+    }
+}
+
 export interface IDBWrapperInterface {
     getObjectStore(
         objectStoreName: string,
@@ -28,7 +38,7 @@ export interface IDBWrapperInterface {
     ): Promise<IDBCursorWithTypedValue<T>>
 }
 
-/** Represents an event target whose result has a specfic type. */
+/** Represents an event target whose result has a specific type. */
 export interface TypedEventTarget<T> extends EventTarget {
     result: T
 }
@@ -82,7 +92,7 @@ export type IDBUpgradeHandler = (
     this: IDBWrapperInterface,
     ev: IDBVersionChangeEvent,
     db: IDBDatabase
-) => any
+) => void
 
 export enum IDBQueryType {
     Only = 0,
@@ -95,14 +105,4 @@ export enum IDBTransactionModes {
     Readonly = 'readonly',
     Readwrite = 'readwrite',
     VersionChange = 'versionchange',
-}
-
-declare global {
-    interface Window {
-        mozIndexedDB?: IDBFactory
-        webkitIndexedDB?: IDBFactory
-        msIndexedDB?: IDBFactory
-        webkitIDBKeyRange?: IDBKeyRange
-        msIDBKeyRange?: IDBKeyRange
-    }
 }
