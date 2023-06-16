@@ -128,6 +128,7 @@ class IDBWrapper {
                         .target.result;
                     if (cursor) {
                         consumer(cursor.value);
+                        cursor.continue();
                     }
                     else {
                         resolve();
@@ -160,6 +161,7 @@ class IDBWrapper {
                         .target.result;
                     if (cursor) {
                         consumer(cursor.value);
+                        cursor.continue();
                     }
                     else {
                         resolve();

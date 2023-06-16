@@ -149,6 +149,7 @@ export default class IDBWrapper implements IDBWrapperInterface {
                         .target.result
                     if (cursor) {
                         consumer(cursor.value)
+                        cursor.continue()
                     } else {
                         resolve()
                     }
@@ -188,6 +189,7 @@ export default class IDBWrapper implements IDBWrapperInterface {
                         .target.result
                     if (cursor) {
                         consumer(cursor.value)
+                        cursor.continue()
                     } else {
                         resolve()
                     }
