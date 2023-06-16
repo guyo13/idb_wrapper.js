@@ -4,14 +4,15 @@
 
 import type {
     CursorEventWithValue,
-    IDBCursorWithTypedValue,
     IDBWrapperArgs,
     IDBWrapperInterface,
     IndexConfig,
     KeyRangeSettings,
     StoreConfig,
+    CursorConsumer,
+    TypedEventTarget,
 } from './types'
-import { IDBQueryType, IDBTransactionModes, TypedEventTarget } from './types'
+import { IDBQueryType, IDBTransactionModes } from './types'
 
 export default class IDBWrapper implements IDBWrapperInterface {
     #indexedDB?: IDBDatabase
@@ -122,8 +123,9 @@ export default class IDBWrapper implements IDBWrapperInterface {
         objectStoreName: string,
         indexName: string,
         mode: IDBTransactionMode,
+        consumer: CursorConsumer<T>,
         keyRangeSettings?: KeyRangeSettings
-    ): Promise<IDBCursorWithTypedValue<T>> {
+    ): Promise<void> {
         return new Promise((resolve, reject) => {
             try {
                 let keyRange
@@ -142,10 +144,15 @@ export default class IDBWrapper implements IDBWrapperInterface {
                     ? index.openCursor(keyRange, keyRangeSettings.direction)
                     : index.openCursor()
                 cursorRequest.onerror = reject
-                cursorRequest.onsuccess = (successEvent) =>
-                    resolve(
-                        (successEvent as CursorEventWithValue<T>).target.result
-                    )
+                cursorRequest.onsuccess = (successEvent) => {
+                    const cursor = (successEvent as CursorEventWithValue<T>)
+                        .target.result
+                    if (cursor) {
+                        consumer(cursor.value)
+                    } else {
+                        resolve()
+                    }
+                }
             } catch (error) {
                 return reject(error)
             }
@@ -156,8 +163,9 @@ export default class IDBWrapper implements IDBWrapperInterface {
     openCursor<T>(
         objectStoreName: string,
         mode: IDBTransactionMode,
-        keyRangeSettings?: KeyRangeSettings
-    ): Promise<IDBCursorWithTypedValue<T>> {
+        consumer: CursorConsumer<T>,
+        keyRangeSettings: KeyRangeSettings
+    ): Promise<void> {
         return new Promise((resolve, reject) => {
             try {
                 let keyRange
@@ -175,10 +183,15 @@ export default class IDBWrapper implements IDBWrapperInterface {
                       )
                     : objectStore.openCursor()
                 cursorRequest.onerror = reject
-                cursorRequest.onsuccess = (successEvent) =>
-                    resolve(
-                        (successEvent as CursorEventWithValue<T>).target.result
-                    )
+                cursorRequest.onsuccess = (successEvent) => {
+                    const cursor = (successEvent as CursorEventWithValue<T>)
+                        .target.result
+                    if (cursor) {
+                        consumer(cursor.value)
+                    } else {
+                        resolve()
+                    }
+                }
             } catch (error) {
                 return reject(error)
             }

@@ -1,4 +1,4 @@
-import type { IDBCursorWithTypedValue, IDBWrapperArgs, IDBWrapperInterface, IndexConfig, KeyRangeSettings, StoreConfig } from './types';
+import type { IDBWrapperArgs, IDBWrapperInterface, IndexConfig, KeyRangeSettings, StoreConfig, CursorConsumer } from './types';
 export default class IDBWrapper implements IDBWrapperInterface {
     #private;
     constructor(args: IDBWrapperArgs);
@@ -18,8 +18,8 @@ export default class IDBWrapper implements IDBWrapperInterface {
     };
     getObjectStore(objectStoreName: string, mode?: IDBTransactionMode): IDBObjectStore;
     getIndex(objectStoreName: string, indexName: string, mode?: IDBTransactionMode): IDBIndex;
-    openIndexCursor<T>(objectStoreName: string, indexName: string, mode: IDBTransactionMode, keyRangeSettings?: KeyRangeSettings): Promise<IDBCursorWithTypedValue<T>>;
-    openCursor<T>(objectStoreName: string, mode: IDBTransactionMode, keyRangeSettings?: KeyRangeSettings): Promise<IDBCursorWithTypedValue<T>>;
+    openIndexCursor<T>(objectStoreName: string, indexName: string, mode: IDBTransactionMode, consumer: CursorConsumer<T>, keyRangeSettings?: KeyRangeSettings): Promise<void>;
+    openCursor<T>(objectStoreName: string, mode: IDBTransactionMode, consumer: CursorConsumer<T>, keyRangeSettings: KeyRangeSettings): Promise<void>;
     getAll<T>(storeName: string): Promise<T[] | null>;
     get<T>(storeName: string, query: IDBValidKey | IDBKeyRange): Promise<T | null>;
     add<T>(storeName: string, object: T): Promise<void>;

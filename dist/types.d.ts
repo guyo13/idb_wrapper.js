@@ -10,8 +10,8 @@ declare global {
 export interface IDBWrapperInterface {
     getObjectStore(objectStoreName: string, mode: IDBTransactionMode): IDBObjectStore;
     getIndex(objectStoreName: string, indexName: string, mode: IDBTransactionMode): IDBIndex;
-    openIndexCursor<T>(objectStoreName: string, indexName: string, mode: IDBTransactionMode, keyRangeSettings?: KeyRangeSettings): Promise<IDBCursorWithTypedValue<T>>;
-    openCursor<T>(objectStoreName: string, mode: IDBTransactionMode, keyRangeSettings?: KeyRangeSettings): Promise<IDBCursorWithTypedValue<T>>;
+    openIndexCursor<T>(objectStoreName: string, indexName: string, mode: IDBTransactionMode, consumer: CursorConsumer<T>, keyRangeSettings: KeyRangeSettings): Promise<void>;
+    openCursor<T>(objectStoreName: string, mode: IDBTransactionMode, consumer: CursorConsumer<T>, keyRangeSettings: KeyRangeSettings): Promise<void>;
     getAll<T>(storeName: string): Promise<T[] | null>;
     get<T>(storeName: string, query: IDBValidKey | IDBKeyRange): Promise<T | null>;
     add<T>(storeName: string, object: T): Promise<void>;
@@ -61,6 +61,7 @@ export interface KeyRangeSettings {
     upperBoundKeyPath?: IDBValidKey;
 }
 export type IDBUpgradeHandler = (this: IDBWrapperInterface, ev: IDBVersionChangeEvent, db: IDBDatabase) => void;
+export type CursorConsumer<T> = (arg: T) => void;
 export declare enum IDBQueryType {
     Only = 0,
     Bound = 1,

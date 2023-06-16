@@ -28,14 +28,16 @@ export interface IDBWrapperInterface {
         objectStoreName: string,
         indexName: string,
         mode: IDBTransactionMode,
-        keyRangeSettings?: KeyRangeSettings
-    ): Promise<IDBCursorWithTypedValue<T>>
+        consumer: CursorConsumer<T>,
+        keyRangeSettings: KeyRangeSettings
+    ): Promise<void>
 
     openCursor<T>(
         objectStoreName: string,
         mode: IDBTransactionMode,
-        keyRangeSettings?: KeyRangeSettings
-    ): Promise<IDBCursorWithTypedValue<T>>
+        consumer: CursorConsumer<T>,
+        keyRangeSettings: KeyRangeSettings
+    ): Promise<void>
 
     getAll<T>(storeName: string): Promise<T[] | null>
 
@@ -106,6 +108,8 @@ export type IDBUpgradeHandler = (
     ev: IDBVersionChangeEvent,
     db: IDBDatabase
 ) => void
+
+export type CursorConsumer<T> = (arg: T) => void
 
 export enum IDBQueryType {
     Only = 0,

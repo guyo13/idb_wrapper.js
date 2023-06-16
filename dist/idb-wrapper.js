@@ -108,7 +108,7 @@ class IDBWrapper {
         return this.getObjectStore(objectStoreName, mode).index(indexName);
     }
     /// Opens a cursor on an index in an object store.
-    openIndexCursor(objectStoreName, indexName, mode, keyRangeSettings) {
+    openIndexCursor(objectStoreName, indexName, mode, consumer, keyRangeSettings) {
         return new Promise((resolve, reject) => {
             try {
                 let keyRange;
@@ -123,7 +123,16 @@ class IDBWrapper {
                     ? index.openCursor(keyRange, keyRangeSettings.direction)
                     : index.openCursor();
                 cursorRequest.onerror = reject;
-                cursorRequest.onsuccess = (successEvent) => resolve(successEvent.target.result);
+                cursorRequest.onsuccess = (successEvent) => {
+                    const cursor = successEvent
+                        .target.result;
+                    if (cursor) {
+                        consumer(cursor.value);
+                    }
+                    else {
+                        resolve();
+                    }
+                };
             }
             catch (error) {
                 return reject(error);
@@ -131,7 +140,7 @@ class IDBWrapper {
         });
     }
     /// Opens a cursor on an object store.
-    openCursor(objectStoreName, mode, keyRangeSettings) {
+    openCursor(objectStoreName, mode, consumer, keyRangeSettings) {
         return new Promise((resolve, reject) => {
             try {
                 let keyRange;
@@ -146,7 +155,16 @@ class IDBWrapper {
                     ? objectStore.openCursor(keyRange, keyRangeSettings.direction)
                     : objectStore.openCursor();
                 cursorRequest.onerror = reject;
-                cursorRequest.onsuccess = (successEvent) => resolve(successEvent.target.result);
+                cursorRequest.onsuccess = (successEvent) => {
+                    const cursor = successEvent
+                        .target.result;
+                    if (cursor) {
+                        consumer(cursor.value);
+                    }
+                    else {
+                        resolve();
+                    }
+                };
             }
             catch (error) {
                 return reject(error);
