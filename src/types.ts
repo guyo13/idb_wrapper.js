@@ -46,6 +46,8 @@ export interface IDBWrapperInterface {
 
     add<T>(storeName: string, object: T): Promise<void>
 
+    put<T>(storeName: string, object: T): Promise<void>
+
     delete(storeName: string, query: IDBValidKey | IDBKeyRange): Promise<void>
 }
 

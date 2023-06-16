@@ -226,6 +226,20 @@ export default class IDBWrapper implements IDBWrapperInterface {
         })
     }
 
+    put<T>(storeName: string, object: T): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const store = this.getObjectStore(
+                storeName,
+                IDBTransactionModes.Readwrite
+            )
+            const putRequest = store.put(object)
+            putRequest.onsuccess = () => {
+                resolve()
+            }
+            putRequest.onerror = reject
+        })
+    }
+
     delete(storeName: string, query: IDBValidKey | IDBKeyRange): Promise<void> {
         return new Promise((resolve, reject) => {
             const store = this.getObjectStore(

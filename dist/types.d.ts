@@ -15,6 +15,7 @@ export interface IDBWrapperInterface {
     getAll<T>(storeName: string): Promise<T[] | null>;
     get<T>(storeName: string, query: IDBValidKey | IDBKeyRange): Promise<T | null>;
     add<T>(storeName: string, object: T): Promise<void>;
+    put<T>(storeName: string, object: T): Promise<void>;
     delete(storeName: string, query: IDBValidKey | IDBKeyRange): Promise<void>;
 }
 /** A typed version of a DOM EventTarget object. */

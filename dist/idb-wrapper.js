@@ -183,6 +183,16 @@ class IDBWrapper {
             addRequest.onerror = reject;
         });
     }
+    put(storeName, object) {
+        return new Promise((resolve, reject) => {
+            const store = this.getObjectStore(storeName, IDBTransactionModes.Readwrite);
+            const putRequest = store.put(object);
+            putRequest.onsuccess = () => {
+                resolve();
+            };
+            putRequest.onerror = reject;
+        });
+    }
     delete(storeName, query) {
         return new Promise((resolve, reject) => {
             const store = this.getObjectStore(storeName, IDBTransactionModes.Readwrite);
